@@ -6,6 +6,9 @@ from scipy import signal
 from scipy.signal import get_window
 from librosa.filters import mel
 from numpy.random import RandomState
+from pathlib import Path
+import ipdb
+from tqdm import tqdm
 
 def butter_highpass(cutoff, fs, order=5):
     nyq = 0.5 * fs
@@ -39,20 +42,35 @@ b, a = butter_highpass(30, 16000, order=5)
 rootDir = './wavs'
 # rootDir = './kids_speech/wav/'
 # spectrogram directory
-rootDir = '/home/shacharm/Projects/ug/data/LibriTTS/train-clean-100'
+# rootDir = '/home/shacharm/Projects/ug/data/LibriTTS/train-clean-100'
+rootDir = '/home/shacharm/Projects/ug/data/kids_speech/wavs'
 targetDir = './spmel'
 
 
 dirName, subdirList, _ = next(os.walk(rootDir))
 print('Found directory: %s' % dirName)
 
-for subdir in sorted(subdirList):
-    print(subdir)
-    if not os.path.exists(os.path.join(targetDir, subdir)):
-        os.makedirs(os.path.join(targetDir, subdir))
-    _,_, fileList = next(os.walk(os.path.join(dirName,subdir)))
-    prng = RandomState(int(subdir[1:])) 
-    for fileName in sorted(fileList):
+for subdir in tqdm(sorted(subdirList)):
+
+    if False:
+        files = (Path(rootDir) / subdir).glob('**/*.wav')
+
+        if not os.path.exists(os.path.join(targetDir, subdir)):
+            os.makedirs(os.path.join(targetDir, subdir))
+        _,_, fileList = next(os.walk(os.path.join(dirName,subdir)))
+
+    try:
+        prng = RandomState(int(subdir[1:])) 
+    except:
+        prng = RandomState()
+    for fileName in tqdm(list((Path(rootDir) / subdir).glob('**/*.wav'))):
+        
+        targetSubDir = targetDir / fileName.relative_to(rootDir).parent
+        targetSubDir.mkdir(parents=True, exist_ok=True)
+        targetFile = (targetSubDir / fileName.stem).with_suffix('.npy')
+        if targetFile.exists():
+            continue
+
         # Read audio file
         x, fs = sf.read(os.path.join(dirName,subdir,fileName))
         # Remove drifting noise
@@ -65,7 +83,6 @@ for subdir in sorted(subdirList):
         D_mel = np.dot(D, mel_basis)
         D_db = 20 * np.log10(np.maximum(min_level, D_mel)) - 16
         S = np.clip((D_db + 100) / 100, 0, 1)    
-        # save spect    
-        np.save(os.path.join(targetDir, subdir, fileName[:-4]),
-                S.astype(np.float32), allow_pickle=False)    
+        # save spect
+        np.save(targetFile, S.astype(np.float32), allow_pickle=False)    
         

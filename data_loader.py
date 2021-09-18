@@ -45,7 +45,8 @@ class Utterances(data.Dataset):
                 if j < 2:  # fill in speaker id and embedding
                     uttrs[j] = tmp
                 else: # load the mel-spectrograms
-                    uttrs[j] = np.load(os.path.join(self.root_dir, tmp))
+                    #uttrs[j] = np.load(os.path.join(self.root_dir, tmp))
+                    uttrs[j] = np.load(tmp)
             dataset[idx_offset+k] = uttrs
                    
         

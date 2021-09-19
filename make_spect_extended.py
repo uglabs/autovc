@@ -44,14 +44,16 @@ rootDir = './wavs'
 # rootDir = './kids_speech/wav/'
 # spectrogram directory
 rootDirs = [
-     '../../data/LibriTTS/train-clean-100',
-     '../../data/kids_speech/wavs'
+     '../data/LibriTTS/train-clean-100',
+     '../data/kids_speech/wavs'
 ]
 # rootDir = '/home/shacharm/Projects/ug/data/LibriTTS/train-clean-100'
 # rootDir = '/home/shacharm/Projects/ug/data/kids_speech/wavs'
 targetDir = './spmel'
 
 for rootDir in rootDirs:
+    assert Path(rootDir).exists(), "{} does not exist".format(rootDirs)
+    
     dirName, subdirList, _ = next(os.walk(rootDir))
     print('Found directory: %s' % dirName)
     SAMPLE_RATE = 16000
@@ -73,11 +75,13 @@ for rootDir in rootDirs:
             targetSubDir = targetDir / fileName.relative_to(rootDir).parent
             targetSubDir.mkdir(parents=True, exist_ok=True)
             targetFile = (targetSubDir / fileName.stem).with_suffix('.npy')
+
             if targetFile.exists():
                 continue
 
             # Read audio file
-            x, fs = sf.read(os.path.join(dirName,subdir,fileName))
+            #x, fs = sf.read(os.path.join(dirName,subdir,fileName))
+            x, fs = sf.read(str(fileName))
             x = librosa.resample(x, fs, SAMPLE_RATE)
             fs = SAMPLE_RATE
 

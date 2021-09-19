@@ -124,7 +124,7 @@ class Solver(object):
 
             # save
             if i % save_every == 0:
-                print('save checkpoint and model @ checkpoints/autovc-{}.ckpt'.format(i)
+                print('save checkpoint and model @ checkpoints/autovc-{}.ckpt'.format(i))
                 torch.save({'model': self.G.state_dict(), 'optimizer': self.g_optimizer.state_dict()}, 'checkpoints/autovc-{}.ckpt'.format(i))
 
 

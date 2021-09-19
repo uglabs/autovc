@@ -42,11 +42,12 @@ b, a = butter_highpass(30, 16000, order=5)
 rootDir = './wavs'
 # rootDir = './kids_speech/wav/'
 # spectrogram directory
-# rootDir = '/home/shacharm/Projects/ug/data/LibriTTS/train-clean-100'
-rootDir = '/home/shacharm/Projects/ug/data/kids_speech/wavs'
+#rootDir = '/home/jupyter/data/LibriTTS/train-clean-100'
+rootDir = '/home/jupyter/data/LibriTTS/train-clean-100/'
+#rootDir = '/home/jupyter/data/kids_speech/wavs'
 targetDir = './spmel'
 
-
+print(list(os.walk(rootDir)))
 dirName, subdirList, _ = next(os.walk(rootDir))
 print('Found directory: %s' % dirName)
 

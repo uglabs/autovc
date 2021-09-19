@@ -44,8 +44,8 @@ rootDir = './wavs'
 # rootDir = './kids_speech/wav/'
 # spectrogram directory
 rootDirs = [
-     '/home/shacharm/Projects/ug/data/LibriTTS/train-clean-100',
-     '/home/shacharm/Projects/ug/data/kids_speech/wavs'
+     '../../data/LibriTTS/train-clean-100',
+     '../../data/kids_speech/wavs'
 ]
 # rootDir = '/home/shacharm/Projects/ug/data/LibriTTS/train-clean-100'
 # rootDir = '/home/shacharm/Projects/ug/data/kids_speech/wavs'

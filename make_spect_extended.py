@@ -4,6 +4,7 @@ import numpy as np
 import soundfile as sf
 from scipy import signal
 from scipy.signal import get_window
+import librosa
 from librosa.filters import mel
 from numpy.random import RandomState
 from pathlib import Path
@@ -42,47 +43,54 @@ b, a = butter_highpass(30, 16000, order=5)
 rootDir = './wavs'
 # rootDir = './kids_speech/wav/'
 # spectrogram directory
+rootDirs = [
+     '/home/shacharm/Projects/ug/data/LibriTTS/train-clean-100',
+     '/home/shacharm/Projects/ug/data/kids_speech/wavs'
+]
 # rootDir = '/home/shacharm/Projects/ug/data/LibriTTS/train-clean-100'
-rootDir = '/home/shacharm/Projects/ug/data/kids_speech/wavs'
+# rootDir = '/home/shacharm/Projects/ug/data/kids_speech/wavs'
 targetDir = './spmel'
 
+for rootDir in rootDirs:
+    dirName, subdirList, _ = next(os.walk(rootDir))
+    print('Found directory: %s' % dirName)
+    SAMPLE_RATE = 16000
+    for subdir in tqdm(sorted(subdirList)):
 
-dirName, subdirList, _ = next(os.walk(rootDir))
-print('Found directory: %s' % dirName)
+        if False:
+            files = (Path(rootDir) / subdir).glob('**/*.wav')
 
-for subdir in tqdm(sorted(subdirList)):
+            if not os.path.exists(os.path.join(targetDir, subdir)):
+                os.makedirs(os.path.join(targetDir, subdir))
+            _,_, fileList = next(os.walk(os.path.join(dirName,subdir)))
 
-    if False:
-        files = (Path(rootDir) / subdir).glob('**/*.wav')
+        try:
+            prng = RandomState(int(subdir[1:])) 
+        except:
+            prng = RandomState()
+        for fileName in tqdm(list((Path(rootDir) / subdir).glob('**/*.wav'))):
+            
+            targetSubDir = targetDir / fileName.relative_to(rootDir).parent
+            targetSubDir.mkdir(parents=True, exist_ok=True)
+            targetFile = (targetSubDir / fileName.stem).with_suffix('.npy')
+            if targetFile.exists():
+                continue
 
-        if not os.path.exists(os.path.join(targetDir, subdir)):
-            os.makedirs(os.path.join(targetDir, subdir))
-        _,_, fileList = next(os.walk(os.path.join(dirName,subdir)))
+            # Read audio file
+            x, fs = sf.read(os.path.join(dirName,subdir,fileName))
+            x = librosa.resample(x, fs, SAMPLE_RATE)
+            fs = SAMPLE_RATE
 
-    try:
-        prng = RandomState(int(subdir[1:])) 
-    except:
-        prng = RandomState()
-    for fileName in tqdm(list((Path(rootDir) / subdir).glob('**/*.wav'))):
-        
-        targetSubDir = targetDir / fileName.relative_to(rootDir).parent
-        targetSubDir.mkdir(parents=True, exist_ok=True)
-        targetFile = (targetSubDir / fileName.stem).with_suffix('.npy')
-        if targetFile.exists():
-            continue
-
-        # Read audio file
-        x, fs = sf.read(os.path.join(dirName,subdir,fileName))
-        # Remove drifting noise
-        y = signal.filtfilt(b, a, x)
-        # Ddd a little random noise for model roubstness
-        wav = y * 0.96 + (prng.rand(y.shape[0])-0.5)*1e-06
-        # Compute spect
-        D = pySTFT(wav).T
-        # Convert to mel and normalize
-        D_mel = np.dot(D, mel_basis)
-        D_db = 20 * np.log10(np.maximum(min_level, D_mel)) - 16
-        S = np.clip((D_db + 100) / 100, 0, 1)    
-        # save spect
-        np.save(targetFile, S.astype(np.float32), allow_pickle=False)    
+            # Remove drifting noise
+            y = signal.filtfilt(b, a, x)
+            # Ddd a little random noise for model roubstness
+            wav = y * 0.96 + (prng.rand(y.shape[0])-0.5)*1e-06
+            # Compute spect
+            D = pySTFT(wav).T
+            # Convert to mel and normalize
+            D_mel = np.dot(D, mel_basis)
+            D_db = 20 * np.log10(np.maximum(min_level, D_mel)) - 16
+            S = np.clip((D_db + 100) / 100, 0, 1)    
+            # save spect
+            np.save(targetFile, S.astype(np.float32), allow_pickle=False)    
         

@@ -61,6 +61,7 @@ class Solver(object):
         # Start training.
         print('Start training...')
         start_time = time.time()
+        save_every = 5000
         for i in range(self.num_iters):
 
             # =================================================================================== #
@@ -119,6 +120,14 @@ class Solver(object):
                 for tag in keys:
                     log += ", {}: {:.4f}".format(tag, loss[tag])
                 print(log)
+
+
+            # save
+            if i % save_every == 0:
+                print('save checkpoint and model @ checkpoints/autovc-{}.ckpt'.format(i)
+                torch.save({'model': self.G.state_dict(), 'optimizer': self.g_optimizer.state_dict()}, 'checkpoints/autovc-{}.ckpt'.format(i))
+
+
                 
 
     

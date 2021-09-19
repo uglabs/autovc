@@ -3,7 +3,7 @@ from tqdm import tqdm
 import shutil
 from pathlib import Path
 
-kids_path = Path('/home/shacharm/Projects/ug/data/kids_speech')
+kids_path = Path('../data/kids_speech')
 
 if __name__ == "__main__":
     wavDir = kids_path / 'wav'

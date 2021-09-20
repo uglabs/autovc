@@ -25,7 +25,8 @@ def main(config):
 if __name__ == '__main__':
     # self.G = Generator(self.dim_neck, self.dim_emb, self.dim_pre, self.freq)        
     # self.G = Generator(16, 256, 512, 16)
-
+    # in the notebook 32,256,512,32
+    # --dim_neck 32 --dim_emb 256 --dim_pre 512 --freq 32
     parser = argparse.ArgumentParser()
 
     # Model configuration.

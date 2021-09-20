@@ -8,6 +8,7 @@ from collections import OrderedDict
 from pathlib import Path
 import numpy as np
 import torch
+import ipdb
 
 C = D_VECTOR(dim_input=80, dim_cell=768, dim_emb=256).eval().cuda()
 c_checkpoint = torch.load('3000000-BL.ckpt')
@@ -54,11 +55,19 @@ for speaker in sorted(subdirList):
         tmp = np.load(fileList[idx_uttrs[i]])
         candidates = np.delete(np.arange(len(fileList)), idx_uttrs)
         # choose another utterance if the current one is too short
+        ok = False
         while tmp.shape[0] <= len_crop:
+            if len(candidates) == 0:
+                break
             idx_alt = np.random.choice(candidates)
             #tmp = np.load(os.path.join(dirName, speaker, fileList[idx_alt]))
             tmp = np.load(fileList[idx_alt])
             candidates = np.delete(candidates, np.argwhere(candidates==idx_alt))
+        else:
+            ok = True
+
+        if not ok:
+            continue
         
         try:
             left = np.random.randint(0, tmp.shape[0]-len_crop)
